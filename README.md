@@ -2,7 +2,7 @@
 ## Description
 Maybe once you had an idea and you wanted to code it in C++, but you were too lazy to write a Makefile or a CMakeList.txt, but you didn't want either to just write "g++ main.cpp yolol.cpp", so finally you didn't code because of this.
 
-With Cetupp you just need to write ./Cetupp.rb nameOfYourProject and then a basic CMakeLists.txt is created.
+With Cetupp you just need to write ./cetupp.rb nameOfYourProject and then a basic CMakeLists.txt is created.
 
 You have few options like separating the headers __--header_lib__ froms other sources or allowing to use thread on Unix (even with the thread from STD most of the time you need it to use threads) __--unix_thread__. You also can link a library with __--lib libName__.
 
