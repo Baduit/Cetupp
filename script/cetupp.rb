@@ -39,6 +39,7 @@ def createCMakeFile(location, basename, unix_thread, libs, header_dir)
 	f = File.open(location + '/CMakeLists.txt', 'w')
 	f.puts("cmake_minimum_required(VERSION 3.0)")
 	f.puts("project(" + basename + ")")
+	f.puts("add_definitions(-std=c++14)")
 	if unix_thread then
 		f.puts("if(UNIX)")
 		f.puts("    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pthread)")
@@ -77,7 +78,6 @@ def main()
 		elsif a == "--unix_thread" then
 			unix_thread = true
 		# set arg_type (options with an argument)
-			arg_type = :incl_boost_header_lib
 		elsif a == "--include_lib" then
 			arg_type = :incl_lib
 		# use arg_type (options with an argument)
