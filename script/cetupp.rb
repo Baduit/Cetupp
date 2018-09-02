@@ -8,7 +8,6 @@
 # options basiques
 # pour tous il faut un nom seul argument qui n'est pas une option
 # options pour séparer .h des .hpp dans src --header_dir
-# options pour désact un module de test --test et --no_test pour désactiver
 
 # options avancées
 # options pour ajouter pthread sous unix --unix_thread
@@ -17,6 +16,7 @@
 
 # ça consiste à créer les dossiers, créer un/des fichier(s) de base, créer le cmake avec les bonnes règles
 
+require 'pathname'
 
 module DestType
     BIN = 1
@@ -24,18 +24,68 @@ module DestType
     HEADER_LIB = 3
 end
 
+def createTestDir(location)
+    Dir.mkdir(location + "/test");
+    f = File.open(location + "/test/test.cpp", 'w')
+    f.puts("#include <iostream>")
+    f.puts("")
+    f.puts("int\tmain()")
+    f.puts("{")
+    f.puts("\tstd::cout << \"Passed\" << std::endl;")
+    f.puts("\treturn 0;")
+    f.puts("}")
+end
+
+def createSrcDir(location, dest_type, basename)
+    Dir.mkdir(location + "/src")
+    if dest_type == DestType::BIN then
+        f = File.open(location + "/src/main.cpp", 'w')
+        f.puts("#include <iostream>")
+        f.puts("")
+        f.puts("int\tmain()")
+        f.puts("{")
+        f.puts("\tstd::cout << \"Hello, World!\" << std::endl;")
+        f.puts("\treturn 0;")
+        f.puts("}")
+    elsif dest_type == DestType::LIB then
+        f = File.open(location + "/src/" + basename + ".cpp", 'w')
+        f.puts("#include \"" + basename + ".hpp\"")
+        f.puts("")
+        f.puts("using namespace " + basename + ";")
+    end
+end
+
+def createHeadertDir(location, dest_type, basename, header_dir)
+    if header_dir then
+        Dir.mkdir(location + "/header")
+        if dest_type != DestType::BIN then
+            f = File.open(location + "/header/" + basename + ".hpp", 'w')
+            f.write("#pragma once\n\nnamespace " + basename + "\n{\n\n\n}\n")
+        end
+    else
+        if dest_type != DestType::BIN then
+            f = File.open(location + "/src/" + basename + ".hpp", 'w')
+            f.write("#pragma once\n\nnamespace " + basename + "\n{\n\n\n}\n")
+        end
+    end
+end
+
+def createCMakeFile(location, dest_type, basename)
+    f = File.open(location + '/CMakeLists.txt', 'w')
+    #TO DO
+end
+
+
 def main()
     #default values
     arg_type = :name # possible values :name, :incl_boost_lib, :incl_boost_header_lib, :incl_lib
     dest_type = DestType::BIN
     header_dir = false
-    test_module = true
     unix_thread = false
     boost_libs = []
     boost_header_libs = []
     libs = []
     name = "HelloWorld"
-
 
     # handling arguments
     ARGV.each do|a|
@@ -49,10 +99,6 @@ def main()
         # options without arguments
         elsif a == "--header_dir" then
             header_dir = true
-        elsif a == "--test" then
-            test_module = true
-        elsif a == "--no_test" then
-            test_module = false
         elsif a == "--unix_thread" then
             unix_thread = true
         # set arg_type (options with an argument)
@@ -76,7 +122,19 @@ def main()
             arg_type = :name
         end
     end
+
+    basename = Pathname.new(name).basename.to_s
+    location = './' + Pathname.new(name).dirname.to_s + '/'
+
+    Dir.mkdir(location + basename)
+    location += basename + '/'
+
     puts "yeah"
+
+    createCMakeFile(location, dest_type, basename)
+    createSrcDir(location, dest_type, basename)
+    createHeadertDir(location, dest_type, basename, header_dir)
+    createTestDir(location)
 end
 
 main
